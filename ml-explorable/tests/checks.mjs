@@ -144,4 +144,28 @@ checks.ch4 = async (page, ok, vp) => {
   }
 };
 
+checks.ch5 = async (page, ok, vp) => {
+  const sec = page.locator('#memorizing-vs-learning');
+  await sec.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  const setDeg = (d) => sec.getByRole('slider', { name: 'Complexity' }).evaluate((el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, d);
+  const at = (d) => page.evaluate((d) => window.__ml.ch5.sweep[d], d);
+  await setDeg(3);
+  const good = await at(3);
+  ok(await page.evaluate(() => window.__ml.ch5.zone()) === 'good', `complexity 3 is "just right" (hidden-day error ${good.test.toFixed(3)})`);
+  await setDeg(12);
+  const over = await at(12);
+  ok(over.train < good.train && over.test > good.test * 5, `complexity 12: learned-day error falls (${over.train.toFixed(4)}) while hidden-day error rises (${over.test.toFixed(1)})`);
+  ok(await sec.locator('.verdict').textContent().then((t) => /Memorizing/.test(t)), 'the verdict flags memorizing');
+  await page.locator('#memorizing-vs-learning .lab').screenshot({ path: `shots/ch5-over-${vp.name}.png` });
+
+  await sec.getByRole('button', { name: /collect more data/i }).click();
+  await page.waitForFunction(() => !window.__ml.ch5.playing, null, { timeout: 60000 });
+  const more = await page.evaluate(() => ({ n: window.__ml.ch5.n, s: window.__ml.ch5.sweep[12] }));
+  ok(more.n === 80 && more.s.test < over.test / 10, `with ${more.n} days the same complex model stops overfitting (hidden error ${more.s.test.toFixed(3)})`);
+  await page.locator('#memorizing-vs-learning .lab').screenshot({ path: `shots/ch5-more-${vp.name}.png` });
+  await sec.locator('.timeline input[type=range]').evaluate((el) => { el.value = 0; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  ok(await page.evaluate(() => window.__ml.ch5.n) === 12, 'scrubbing the timeline back restores the original 12 days');
+};
+
 export default checks;

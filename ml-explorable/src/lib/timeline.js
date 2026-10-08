@@ -10,7 +10,7 @@ const PAD_L = 8, PAD_R = 8, PAD_T = 10, PAD_B = 16;
  * timeline plots each value over time and lets the reader scrub back to any
  * moment, replay the whole run, or rewind and continue from the past.
  *
- *   series:  [{ key: 'loss', label: 'error', color: '--error' }, ...]
+ *   series:  [{ key: 'loss', label: 'error', color: '--error', dash: false }, ...]
  *   onView(state, { live }) is called whenever the viewed moment changes.
  */
 export function createTimeline(container, {
@@ -53,8 +53,8 @@ export function createTimeline(container, {
   // Dragging directly on the chart scrubs too.
   const toIndex = (x) => {
     if (!entries.length) return 0;
-    const lastStep = entries[entries.length - 1].step || 1;
-    const step = ((x - PAD_L) / Math.max(1, plot.w - PAD_L - PAD_R)) * lastStep;
+    const first = entries[0].step, span = entries[entries.length - 1].step - first || 1;
+    const step = first + ((x - PAD_L) / Math.max(1, plot.w - PAD_L - PAD_R)) * span;
     let best = 0;
     for (let i = 0; i < entries.length; i++) if (Math.abs(entries[i].step - step) < Math.abs(entries[best].step - step)) best = i;
     return best;
@@ -85,9 +85,9 @@ export function createTimeline(container, {
       ctx.fillText('Press play to start the clock — every moment of training is recorded here.', PAD_L + 4, hgt / 2 + 4);
       return;
     }
-    const lastStep = entries[entries.length - 1].step || 1;
+    const firstStep = entries[0].step, lastStep = entries[entries.length - 1].step;
     const [y0, y1] = yRange();
-    const X = (s) => PAD_L + (s / lastStep) * (w - PAD_L - PAD_R);
+    const X = (s) => PAD_L + ((s - firstStep) / (lastStep - firstStep || 1)) * (w - PAD_L - PAD_R);
     const Y = (v) => {
       if (!Number.isFinite(v)) return PAD_T;
       const t = logY ? Math.log10(Math.max(v, 1e-4)) : v;
@@ -102,11 +102,13 @@ export function createTimeline(container, {
         i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
       });
       ctx.strokeStyle = col;
+      ctx.setLineDash(s.dash ? [5, 4] : []);
       ctx.lineWidth = 2;
       ctx.lineJoin = 'round';
       ctx.shadowColor = col; ctx.shadowBlur = 8;
       ctx.stroke();
       ctx.shadowBlur = 0;
+      ctx.setLineDash([]);
     }
     // cursor
     const i = viewIndex ?? entries.length - 1;
@@ -122,7 +124,7 @@ export function createTimeline(container, {
     }
     ctx.fillStyle = cssVar('--ink-3');
     ctx.font = '10px "JetBrains Mono", monospace';
-    ctx.textAlign = 'left'; ctx.fillText(`0`, PAD_L, hgt - 3);
+    ctx.textAlign = 'left'; ctx.fillText(firstStep.toLocaleString(), PAD_L, hgt - 3);
     ctx.textAlign = 'right'; ctx.fillText(`${lastStep.toLocaleString()} ${unit}s`, w - PAD_R, hgt - 3);
     ctx.textAlign = 'left';
   }

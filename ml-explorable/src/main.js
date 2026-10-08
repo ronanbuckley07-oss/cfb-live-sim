@@ -8,9 +8,10 @@ import ch1 from './chapters/01-model/index.js';
 import ch2 from './chapters/02-descent/index.js';
 import ch3 from './chapters/03-neuron/index.js';
 import ch4 from './chapters/04-network/index.js';
+import ch5 from './chapters/05-overfitting/index.js';
 
 // Reorder or add chapters here. Each exports { id, title, mount(el) }.
-const chapters = [ch1, ch2, ch3, ch4];
+const chapters = [ch1, ch2, ch3, ch4, ch5];
 
 mountHero(document.querySelector('.hero'));
 
