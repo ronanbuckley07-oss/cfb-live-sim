@@ -37,7 +37,12 @@ export function createLoop(el, tick) {
 
   const loop = {
     get playing() { return playing; },
-    play() { if (!playing) { playing = true; emit(); } kick(); },
+    play() {
+      if (!playing) { playing = true; emit(); }
+      // Re-check on-screen state directly: the observer only reports changes.
+      if (el) { const r = el.getBoundingClientRect(); visible = !document.hidden && r.bottom > -100 && r.top < innerHeight + 100; }
+      kick();
+    },
     pause() {
       if (playing) { playing = false; emit(); }
       if (raf) { cancelAnimationFrame(raf); raf = 0; }

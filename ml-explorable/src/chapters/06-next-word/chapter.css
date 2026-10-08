@@ -1,0 +1,29 @@
+.ch6-main, .ch6-side { display: flex; flex-direction: column; gap: 8px; }
+.ch6-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); margin-top: 6px; }
+.ch6-evidence { color: var(--ink-2); font-size: 0.92rem; margin: 4px 0 0; min-height: 2.8em; }
+.ch6-evidence strong { color: var(--data); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: 500 0.85rem var(--font-mono); color: var(--ink-2); background: var(--bg-inset);
+  border: 1px dashed var(--line-strong); border-radius: 999px; padding: 0 0.85rem; min-height: 36px; cursor: pointer;
+}
+.chip:hover { color: var(--ink); border-color: var(--ink-3); }
+.bars { display: flex; flex-direction: column; gap: 4px; }
+.bar {
+  display: grid; grid-template-columns: minmax(5.5rem, 8.5rem) 1fr 3.4rem; align-items: center; gap: 10px;
+  background: none; border: 0; padding: 4px 6px; min-height: 36px; border-radius: 6px; cursor: pointer; text-align: left; color: var(--ink);
+  animation: none;
+}
+.bar:hover { background: var(--bg-inset); }
+.bar:focus-visible { outline: 2px solid var(--model); }
+.bar__word { font: 500 0.95rem var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar__track { height: 14px; background: var(--bg-inset); border-radius: 0 4px 4px 0; overflow: hidden; }
+.bar__fill { display: block; height: 100%; background: var(--model); border-radius: 0 4px 4px 0; box-shadow: 0 0 12px var(--model-glow); transition: width 0.25s var(--ease); }
+.bar__pct { font: 0.85rem var(--font-mono); color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+.reading {
+  font: 0.9rem/1.7 var(--font-mono); color: var(--ink-3); background: var(--bg-inset); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); padding: 10px 12px; min-height: 8.6em; overflow: hidden;
+}
+.reading .is-read { color: var(--data); opacity: 0.75; }
+.reading .is-now { color: var(--bg); background: var(--data); border-radius: 3px; padding: 0 2px; }
+@media (prefers-reduced-motion: reduce) { .bar__fill { transition: none; } }

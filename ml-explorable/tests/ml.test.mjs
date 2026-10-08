@@ -40,3 +40,18 @@ test('linear gradient descent reaches the exact least-squares line', () => {
   const o = m.optimum();
   assert.ok(Math.abs(m.a - o.a) < 1e-4 && Math.abs(m.c - o.c) < 1e-4);
 });
+
+import { NGram, tokenize, splitText } from '../src/ml/ngram.js';
+import { FABLES } from '../src/ml/fables.js';
+
+test('n-gram probabilities sum to 1 and perplexity falls with more reading', () => {
+  const { read, held } = splitText(FABLES);
+  const m = new NGram([...new Set(tokenize(FABLES))]);
+  const p0 = m.perplexity(held);
+  read.forEach((w) => m.add(w));
+  for (const ctx of [[], ['the'], ['slow', 'and'], ['zzz', 'qqq']]) {
+    const total = [...m.distribution(ctx).probs.values()].reduce((a, b) => a + b, 0);
+    assert.ok(Math.abs(total - 1) < 1e-9, `sums to ${total} for ${ctx}`);
+  }
+  assert.ok(m.perplexity(held) < p0 / 2);
+});

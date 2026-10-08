@@ -168,4 +168,35 @@ checks.ch5 = async (page, ok, vp) => {
   ok(await page.evaluate(() => window.__ml.ch5.n) === 12, 'scrubbing the timeline back restores the original 12 days');
 };
 
+checks.ch6 = async (page, ok, vp) => {
+  const sec = page.locator('#next-word');
+  await sec.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  const input = sec.getByRole('textbox', { name: 'Your words' });
+  await input.fill('slow and');
+  let top = await page.evaluate(() => window.__ml.ch6.top());
+  ok(top.w === 'steady' && top.p > 0.5, `"slow and" → "steady" (${(top.p * 100).toFixed(0)}%)`);
+  const firstBar = await sec.locator('.bar__word').first().textContent();
+  ok(firstBar === 'steady', 'the bar chart shows it on top');
+  await sec.locator('.bar').first().click();
+  ok((await input.inputValue()) === 'slow and steady', 'clicking a bar appends the word');
+  await sec.getByRole('button', { name: /write 12 words/i }).click();
+  const words = (await input.inputValue()).split(/\s+/).length;
+  ok(words >= 12, `sampling writes text (${await input.inputValue()})`);
+  await page.locator('#next-word .lab').screenshot({ path: `shots/ch6-${vp.name}.png` });
+
+  await sec.getByRole('button', { name: /read from scratch/i }).click();
+  await page.waitForTimeout(400);
+  const mid = await page.evaluate(() => window.__ml.ch6.k);
+  await page.waitForFunction(() => !window.__ml.ch6.playing, null, { timeout: 30000 });
+  const r = await page.evaluate(() => ({ k: window.__ml.ch6.k, total: window.__ml.ch6.total, ppl: window.__ml.ch6.perplexity() }));
+  ok(mid > 0 && mid < r.total && r.k === r.total, `reads the text progressively (${mid} → ${r.k} words)`);
+  await sec.locator('.timeline input[type=range]').evaluate((el) => { el.value = 0; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  const start = await page.evaluate(() => ({ ppl: window.__ml.ch6.perplexity(), top: window.__ml.ch6.top() }));
+  ok(start.ppl > r.ppl * 2, `perplexity falls as it reads (${start.ppl.toFixed(0)} → ${r.ppl.toFixed(0)})`);
+  ok(start.top.p < 0.01, 'scrubbed to the start, every word is roughly equally likely');
+  await page.locator('#next-word .lab').screenshot({ path: `shots/ch6-start-${vp.name}.png` });
+  await sec.getByRole('button', { name: /latest/i }).click();
+};
+
 export default checks;
