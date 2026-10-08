@@ -85,4 +85,31 @@ checks.ch2 = async (page, ok, vp) => {
   await sec.getByRole('button', { name: /pause/i }).click();
 };
 
+checks.ch3 = async (page, ok, vp) => {
+  const sec = page.locator('#a-single-neuron');
+  await sec.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  const out = () => sec.locator('.neuron-svg .node--out + text').textContent();
+  const before = await out();
+  const w1 = sec.getByRole('slider', { name: 'Weight 1' });
+  await w1.evaluate((el) => { el.value = -4; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  const after = await out();
+  ok(before !== after, `moving a weight slider updates the output instantly (${before} → ${after})`);
+  const stroke = await sec.locator('.neuron-svg .wire').first().evaluate((el) => el.style.stroke);
+  ok(/error/.test(stroke), 'a negative weight turns its wire red');
+
+  await sec.getByRole('button', { name: /let it learn/i }).click();
+  await page.waitForFunction(() => !window.__ml.ch3.playing, null, { timeout: 30000 });
+  let r = await page.evaluate(() => [0, 1, 2, 3].map((i) => window.__ml.ch3.predictCorner(i)).join(''));
+  ok(r === '0010', `the neuron learns "sunny and calm" (predictions ${r})`);
+  await page.locator('#a-single-neuron .lab').screenshot({ path: `shots/ch3-${vp.name}.png` });
+
+  await sec.getByRole('button', { name: 'The tricky one' }).click();
+  await sec.getByRole('button', { name: /let it learn/i }).click();
+  await page.waitForFunction(() => !window.__ml.ch3.playing, null, { timeout: 30000 });
+  r = await page.evaluate(() => ({ p: [0, 1, 2, 3].map((i) => window.__ml.ch3.predictCorner(i)).join(''), loss: window.__ml.ch3.neuron.loss([[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]]) }));
+  ok(r.p !== '0110' && r.loss > 0.45, `a single neuron cannot learn the tricky one (predictions ${r.p}, error stuck at ${r.loss.toFixed(2)})`);
+  await page.locator('#a-single-neuron .lab').screenshot({ path: `shots/ch3-xor-${vp.name}.png` });
+};
+
 export default checks;
