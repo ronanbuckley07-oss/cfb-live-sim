@@ -1,0 +1,29 @@
+.glossary { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin: 1.5rem 0 2.5rem; }
+.gloss {
+  display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--ink-2);
+  background: var(--bg-raised); border: 1px solid var(--line); border-left: 3px solid var(--c); border-radius: var(--radius-sm);
+  padding: 12px 14px; font-size: 0.9rem; line-height: 1.5; transition: border-color 0.2s, transform 0.2s var(--ease);
+}
+.gloss:hover { border-color: var(--c); color: var(--ink); transform: translateY(-2px); }
+.gloss__term { font-family: var(--font-display); font-size: 1.15rem; color: var(--c); }
+.gloss--model { --c: var(--model); } .gloss--error { --c: var(--error); } .gloss--learn { --c: var(--learn); } .gloss--data { --c: var(--data); }
+.ch7-h { font-size: 1.5rem; margin: 2.5rem 0 1rem; }
+.simplified { max-width: var(--measure); display: flex; flex-direction: column; gap: 8px; }
+.simplified details { background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 14px; }
+.simplified summary { cursor: pointer; min-height: 48px; display: flex; align-items: center; font-weight: 600; list-style: none; }
+.simplified summary::-webkit-details-marker { display: none; }
+.simplified summary::before { content: '+'; font-family: var(--font-mono); color: var(--learn); width: 1.4em; flex: none; }
+.simplified details[open] summary::before { content: '−'; }
+.simplified p { color: var(--ink-2); margin: 0 0 14px 1.4em; font-size: 0.95rem; }
+.links { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.link-card {
+  display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: var(--ink-2);
+  background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; font-size: 0.9rem;
+  transition: border-color 0.2s, transform 0.2s var(--ease);
+}
+.link-card:hover { border-color: var(--model); color: var(--ink-2); transform: translateY(-2px); }
+.link-card__tag { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--learn); }
+.link-card__title { font-family: var(--font-display); font-size: 1.2rem; color: var(--ink); }
+.ch7-end { margin-top: 3rem; font-size: 1.1rem; }
+.ch7-end strong { color: var(--model); }
+@media (prefers-reduced-motion: reduce) { .gloss, .link-card { transition: none; } .gloss:hover, .link-card:hover { transform: none; } }

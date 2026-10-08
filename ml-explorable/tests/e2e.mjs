@@ -35,6 +35,20 @@ for (const vp of [{ name: 'desktop', width: 1280, height: 900 }, { name: 'phone'
   ok(errors.length === 0, `no console errors ${errors.length ? JSON.stringify(errors) : ''}`);
   await ctx.close();
 }
+// Reduced motion: content is visible immediately and the hero does not animate.
+if (!only.length || only.includes('motion')) {
+  console.log('\n[reduced motion]');
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
+  const page = await ctx.newPage();
+  await page.goto(URL, { waitUntil: 'networkidle' });
+  const hidden = await page.evaluate(() => [...document.querySelectorAll('.reveal')].filter((el) => getComputedStyle(el).opacity !== '1').length);
+  ok(hidden === 0, 'reveal animations are skipped');
+  const a = await page.locator('.hero canvas').screenshot();
+  await page.waitForTimeout(800);
+  const b = await page.locator('.hero canvas').screenshot();
+  ok(a.equals(b), 'hero animation is paused');
+  await ctx.close();
+}
 await browser.close();
 console.log(failures ? `\n${failures} check(s) failed` : '\nall checks passed');
 process.exit(failures ? 1 : 0);

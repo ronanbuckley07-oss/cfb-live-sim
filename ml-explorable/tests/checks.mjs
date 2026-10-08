@@ -199,4 +199,23 @@ checks.ch6 = async (page, ok, vp) => {
   await sec.getByRole('button', { name: /latest/i }).click();
 };
 
+checks.page = async (page, ok, vp) => {
+  // Scroll the whole page like a reader: every reveal block must become visible.
+  await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; window.scrollTo(0, 0); });
+  await page.waitForTimeout(200);
+  const h = await page.evaluate(() => document.body.scrollHeight);
+  for (let y = 0; y < h; y += 400) { await page.evaluate((y) => window.scrollTo(0, y), y); await page.waitForTimeout(40); }
+  await page.waitForTimeout(1000);
+  const hiddenEls = await page.evaluate(() => [...document.querySelectorAll('.reveal')].filter((el) => getComputedStyle(el).opacity !== '1').map((el) => `${el.closest('section')?.id}:${el.className}:${getComputedStyle(el).opacity}`));
+  const hidden = hiddenEls.length;
+  ok(hidden === 0, `every section is revealed while scrolling (${hidden} hidden) ${hidden ? JSON.stringify(hiddenEls) : ''} scrollY=${await page.evaluate(() => scrollY)}`);
+  const ids = await page.evaluate(() => [...document.querySelectorAll('main section')].map((s) => s.id));
+  ok(ids.length === 7, `all 7 chapters mounted (${ids.join(', ')})`);
+  if (vp.name === 'phone') {
+    const small = await page.evaluate(() => [...document.querySelectorAll('button, input[type=range], .chip, .bar')]
+      .filter((el) => el.offsetParent && el.getBoundingClientRect().height < 36).map((el) => el.textContent || el.getAttribute('aria-label')));
+    ok(small.length === 0, `touch targets are at least 36px tall ${small.length ? JSON.stringify(small.slice(0, 5)) : ''}`);
+  }
+};
+
 export default checks;
