@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>How Machines Learn</title>
+    <meta name="description" content="An explorable explanation of machine learning: drag, slide and watch real models learn live in your browser." />
+    <meta name="theme-color" content="#0b0f17" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0f17'/%3E%3Cpath d='M5 24 L27 9' stroke='%234de2ff' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='16' r='3' fill='%23f5b544'/%3E%3Ccircle cx='22' cy='18' r='3' fill='%23f5b544'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero__kicker">An explorable explanation</div>
+      <h1>How machines <em>learn</em></h1>
+      <p class="hero__lede">
+        No equations to memorise. On this page you'll train real models with your own hands —
+        every number you see is computed live, in your browser, as you play.
+      </p>
+      <div class="legend-row" aria-label="Colour key used throughout the page">
+        <span><i class="swatch" style="background:var(--data)"></i>data — what we observed</span>
+        <span><i class="swatch" style="background:var(--model)"></i>the model — its guess</span>
+        <span><i class="swatch" style="background:var(--error)"></i>error — how wrong it is</span>
+        <span><i class="swatch" style="background:var(--learn)"></i>learning — the next step</span>
+      </div>
+      <div class="scroll-cue">↓ scroll to begin</div>
+    </header>
+    <main id="chapters"></main>
+    <footer class="site-footer">
+      Built with plain JavaScript — no ML libraries. Every model on this page trains live in your browser.
+    </footer>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
