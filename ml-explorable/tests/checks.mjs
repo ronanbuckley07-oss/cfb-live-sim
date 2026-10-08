@@ -112,4 +112,36 @@ checks.ch3 = async (page, ok, vp) => {
   await page.locator('#a-single-neuron .lab').screenshot({ path: `shots/ch3-xor-${vp.name}.png` });
 };
 
+checks.ch4 = async (page, ok, vp) => {
+  const sec = page.locator('#a-neural-network');
+  await sec.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  const run = async (dataset, neurons, layers) => {
+    await sec.getByRole('button', { name: dataset }).click();
+    await sec.getByRole('button', { name: layers === 2 ? '2 layers' : '1 layer' }).click();
+    await sec.getByRole('slider', { name: 'Neurons per layer' }).evaluate((el, n) => { el.value = n; el.dispatchEvent(new Event('input', { bubbles: true })); }, neurons);
+    const t0 = Date.now();
+    await sec.getByRole('button', { name: /^.?\s*Play/ }).click();
+    await page.waitForFunction(() => window.__ml.ch4.done, null, { timeout: 120000 });
+    return page.evaluate((secs) => ({ acc: window.__ml.ch4.accuracy(), step: window.__ml.ch4.step, loss: window.__ml.ch4.loss(), secs }), (Date.now() - t0) / 1000);
+  };
+  let r = await run('Circles', 4, 1);
+  ok(r.acc === 1, `circles: 4 neurons reach ${Math.round(r.acc * 100)}% in ${r.step} steps (${r.secs.toFixed(1)}s)`);
+  r = await run('Four corners', 4, 1);
+  ok(r.acc === 1, `four corners: ${Math.round(r.acc * 100)}% in ${r.step} steps (${r.secs.toFixed(1)}s)`);
+  await page.locator('#a-neural-network .lab').screenshot({ path: `shots/ch4-xor-${vp.name}.png` });
+  r = await run('Spirals', 8, 2);
+  ok(r.acc >= 0.98, `spirals: 2×8 network reaches ${Math.round(r.acc * 100)}% in ${r.step} steps (${r.secs.toFixed(1)}s)`);
+  await page.locator('#a-neural-network .lab').screenshot({ path: `shots/ch4-spiral-${vp.name}.png` });
+  // Scrub back to the start: the boundary must return to its untrained state.
+  await sec.locator('.timeline input[type=range]').evaluate((el) => { el.value = 0; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  const early = await page.evaluate(() => window.__ml.ch4.accuracy());
+  ok(early < 0.8, `scrubbing to step 0 shows the untrained network (${Math.round(early * 100)}%)`);
+  await page.locator('#a-neural-network .lab').screenshot({ path: `shots/ch4-spiral-start-${vp.name}.png` });
+  if (vp.name === 'desktop') {
+    r = await run('Spirals', 2, 1);
+    ok(r.acc < 0.9, `spirals: a 2-neuron network can't do it (${Math.round(r.acc * 100)}% after ${r.step} steps)`);
+  }
+};
+
 export default checks;
